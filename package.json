@@ -1,0 +1,20 @@
+{
+  "name": "grupanya-task-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace=apps/api run dev",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "build": "npm -ws run build",
+    "postinstall": "npm --workspace=packages/ui run build && npm --workspace=packages/sdk run build",
+    "start": "npm --workspace=apps/api run start & npm --workspace=apps/web run start",
+    "lint": "echo 'add linter later'",
+    "typecheck": "npm -ws run typecheck",
+    "safe:restart": "bash ./scripts/safe-restart.sh",
+    "safe:migrate": "bash ./scripts/safe-migrate.sh"
+  }
+}

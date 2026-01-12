@@ -1,0 +1,38 @@
+name: Deploy Web to Vercel
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install deps (root)
+        run: npm ci
+      - name: Build shared packages
+        run: |
+          npm --workspace=packages/ui run build
+          npm --workspace=packages/sdk run build
+      - name: Deploy with Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: apps/web
+          vercel-args: >-
+            --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Build-time envs forwarded to Next.js
+          NEXT_PUBLIC_API_BASE: ${{ secrets.WEB_API_BASE }}
+          NEXT_PUBLIC_DEV_USER_ID: ${{ secrets.WEB_DEV_USER_ID }}
+          NEXT_PUBLIC_DEV_ROLE: ${{ secrets.WEB_DEV_ROLE }}
+

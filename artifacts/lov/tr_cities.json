@@ -1,0 +1,9 @@
+{
+  "cities": [
+    { "label": "İstanbul Avrupa", "code": "İstanbul Avrupa", "districts": ["Beşiktaş", "Beyoğlu", "Bakırköy", "Şişli", "Fatih", "Kağıthane", "Sarıyer", "Eyüpsultan", "Zeytinburnu", "Avcılar", "Bağcılar", "Bahçelievler", "Başakşehir", "Bayrampaşa", "Beşiktaş", "Büyükçekmece", "Çatalca", "Esenler", "Esenyurt", "Gaziosmanpaşa", "Güngören", "Silivri", "Küçükçekmece", "Sultangazi"] },
+    { "label": "İstanbul Anadolu", "code": "İstanbul Anadolu", "districts": ["Kadıköy", "Ataşehir", "Üsküdar", "Ümraniye", "Beykoz", "Çekmeköy", "Kartal", "Maltepe", "Pendik", "Sancaktepe", "Sultanbeyli", "Şile", "Tuzla"] },
+    { "label": "Ankara", "code": "Ankara", "districts": ["Çankaya", "Keçiören", "Yenimahalle", "Mamak", "Etimesgut", "Sincan", "Altındağ", "Pursaklar", "Gölbaşı", "Polatlı", "Beypazarı"] },
+    { "label": "İzmir", "code": "İzmir", "districts": ["Konak", "Karşıyaka", "Bornova", "Buca", "Karabağlar", "Bayraklı", "Gaziemir", "Çiğli", "Balçova", "Narlıdere"] }
+  ]
+}
+

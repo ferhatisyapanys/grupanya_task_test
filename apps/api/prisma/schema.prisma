@@ -1,0 +1,531 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core entities (initial minimal set reflecting the document)
+model User {
+  id    String @id @default(cuid())
+  name  String?
+  email String  @unique
+  role  Role    @default(SALESPERSON)
+  // Auth-related optional fields for future JWT auth
+  password   String?
+  firstName  String?
+  lastName   String?
+  isActive   Boolean @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  tasks        Task[]     @relation("TaskOwner")
+  activityLogs ActivityLog[]
+  leadsCreated Lead[]
+  // Role mapping (optional, alongside enum)
+  appRoleId    String?
+  appRole      AppRole? @relation(fields: [appRoleId], references: [id])
+  refreshTokens RefreshToken[]
+  leadLogs     LeadActivityLog[] @relation("UserLeadLogs")
+  accountNotes AccountNote[]
+  dealHistories DealHistory[]
+  // New inverse relations
+  createdTaskLists TaskList[] @relation("TaskListCreator")
+  createdTasks     Task[]     @relation("TaskCreator")
+  createdOffers    Offer[]    @relation("OfferCreator")
+
+  // Manager -> Salespersons hierarchy
+  managerId   String?
+  manager     User?  @relation("UserManager", fields: [managerId], references: [id])
+  salespersons User[] @relation("UserManager")
+}
+
+model Account {
+  id             String    @id @default(cuid())
+  externalRef    String?
+  accountPublicId String?  @unique
+  accountName    String
+  businessName   String
+  status         AccountStatus
+  source         AccountSource
+  category       String
+  mainCategory   String?
+  subCategory    String?
+  type           AccountType
+  creationDate   DateTime  @default(now())
+  businessContact String?
+  contactPerson   String?
+  notes           String?
+  city            String?
+  district        String?
+  address         String?
+  website         String?
+  instagram       String?
+  services        String?
+  bestService     String?
+
+  tasks     Task[]
+  history   ActivityHistory[]
+  leads     Lead[]   @relation("AccountLeads")
+  deals     Deal[]
+  contacts  AccountContact[]
+  notesRel  AccountNote[]
+
+  @@index([accountName])
+  @@index([creationDate])
+  @@index([externalRef])
+}
+
+model TaskList {
+  id        String   @id @default(cuid())
+  externalRef String?
+  name      String
+  tag       TaskListTag
+  createdBy String
+  createdById String?
+  creator   User?    @relation("TaskListCreator", fields: [createdById], references: [id])
+  description String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
+model Task {
+  id             String   @id @default(cuid())
+  externalRef    String?
+  taskPublicId   String?  @unique
+  taskListId     String
+  accountId      String
+  ownerId        String?
+  createdById    String?
+  category       TaskCategory
+  type           TaskType
+  priority       TaskPriority
+  accountType    AccountType
+  source         AccountSource
+  mainCategory   String
+  subCategory    String
+  contact        String?
+  details        String
+  creationDate   DateTime  @default(now())
+  assignmentDate DateTime?
+  durationDays   Int?
+  dueDate        DateTime?
+  status         TaskStatus @default(NOT_HOT)
+  generalStatus  GeneralStatus @default(OPEN)
+  city           String?
+  district       String?
+  previousTaskId String?
+  lastSalesperson String?
+  followUpDate   DateTime?
+  closedAt       DateTime?
+  closedReason   String?
+
+  account  Account @relation(fields: [accountId], references: [id])
+  owner    User?   @relation("TaskOwner", fields: [ownerId], references: [id])
+  creator  User?   @relation("TaskCreator", fields: [createdById], references: [id])
+  logs     ActivityLog[]
+  offers   Offer[]
+  deals    Deal[]
+  notifications Notification[]
+  contacts  TaskContact[]
+  @@index([externalRef])
+
+  @@index([ownerId])
+  @@index([dueDate])
+}
+
+model ActivityLog {
+  id           String      @id @default(cuid())
+  taskId       String
+  authorId     String
+  reason       Reason
+  followUpDate DateTime?
+  text         String?
+  createdAt    DateTime    @default(now())
+
+  task   Task @relation(fields: [taskId], references: [id])
+  author User @relation(fields: [authorId], references: [id])
+  offer  Offer[]
+}
+
+model Offer {
+  id        String   @id @default(cuid())
+  taskId    String
+  adFee     Float?
+  commission Float?
+  joker     Float?
+  activityLogId String?
+  type       OfferType?
+  status     OfferStatus? @default(PENDING)
+  createdById String?
+
+  task Task @relation(fields: [taskId], references: [id])
+  activity ActivityLog? @relation(fields: [activityLogId], references: [id])
+  createdBy User? @relation("OfferCreator", fields: [createdById], references: [id])
+}
+
+model ActivityHistory {
+  id        String   @id @default(cuid())
+  accountId String
+  type      HistoryType
+  summary   String
+  createdAt DateTime @default(now())
+
+  account Account @relation(fields: [accountId], references: [id])
+}
+
+model Lead {
+  id              String   @id @default(cuid())
+  externalRef     String?
+  createdAt       DateTime @default(now())
+  payload         Json
+  linkedAccountId String?
+  linkedAccount   Account? @relation("AccountLeads", fields: [linkedAccountId], references: [id])
+  // normalized fields (optional)
+  person          String?
+  status          String?
+  queryStatus     String?
+  statusEndWeek   String?
+  firstName       String?
+  lastName        String?
+  email           String?
+  phone           String?
+  webCategory     String?
+  mainCategory    String?
+  subCategory     String?
+  company         String?
+  website         String?
+  district        String?
+  city            String?
+  address         String?
+  services        String?
+  bestService     String?
+  // Extended fields for status and ownership
+  workflowStatus  LeadWorkflowStatus @default(NEW)
+  createdById     String?
+  createdBy       User? @relation(fields: [createdById], references: [id])
+  activity        LeadActivityLog[]
+  @@index([externalRef])
+}
+
+model Deal {
+  id        String   @id @default(cuid())
+  dealId    String?  @unique
+  accountId String
+  taskId    String?
+  title     String
+  startDate DateTime
+  endDate   DateTime
+  status    DealStatus
+  value     Float?
+  lastSalespersonId String?
+  metadata  Json?
+
+  account Account @relation(fields: [accountId], references: [id])
+  task    Task?   @relation(fields: [taskId], references: [id])
+  histories DealHistory[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  taskId    String
+  toUserId  String
+  message   String
+  readAt    DateTime?
+  type      NotificationType @default(INFO)
+
+  task  Task @relation(fields: [taskId], references: [id])
+  // Not creating explicit user relation to keep it simple initially
+}
+
+model ReportJob {
+  id        String   @id @default(cuid())
+  type      String
+  cron      String
+  lastRunAt DateTime?
+}
+
+// Generic List-Of-Values (LOV) storage
+model Lookup {
+  id     String  @id @default(cuid())
+  type   String
+  code   String?
+  label  String
+  active Boolean @default(true)
+  parentId String?
+  order    Int     @default(0)
+
+  parent Lookup? @relation("LookupHierarchy", fields: [parentId], references: [id])
+  children Lookup[] @relation("LookupHierarchy")
+  @@index([type, label])
+}
+
+model AppRole {
+  id          String @id @default(cuid())
+  name        String @unique
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  id    String @id @default(cuid())
+  name  String @unique
+  module String
+  description String?
+  roles RolePermission[]
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+  role         AppRole @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model LeadActivityLog {
+  id           String   @id @default(cuid())
+  leadId       String
+  action       LeadAction
+  details      Json?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  lead         Lead @relation(fields: [leadId], references: [id])
+  author       User? @relation("UserLeadLogs", fields: [createdById], references: [id])
+}
+
+model AccountContact {
+  id         String   @id @default(cuid())
+  accountId  String
+  type       ContactType
+  name       String
+  phone      String?
+  email      String?
+  address    String?
+  isPrimary  Boolean @default(false)
+  createdAt  DateTime @default(now())
+
+  account    Account @relation(fields: [accountId], references: [id])
+  tasks      TaskContact[]
+}
+
+model AccountNote {
+  id          String   @id @default(cuid())
+  accountId   String
+  content     String
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  account     Account @relation(fields: [accountId], references: [id])
+  author      User? @relation(fields: [createdById], references: [id])
+}
+
+model DealHistory {
+  id            String   @id @default(cuid())
+  dealId        String
+  action        DealAction
+  previousValue Json?
+  newValue      Json?
+  performedById String?
+  createdAt     DateTime @default(now())
+
+  deal          Deal @relation(fields: [dealId], references: [id])
+  performer     User? @relation(fields: [performedById], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  TEAM_LEADER
+  SALESPERSON
+}
+
+enum AccountStatus {
+  ACTIVE
+  PASSIVE
+}
+enum AccountType {
+  KEY
+  LONG_TAIL
+}
+enum AccountSource {
+  QUERY
+  FRESH
+  RAKIP
+  REFERANS
+  OLD
+}
+
+enum LeadWorkflowStatus {
+  NEW
+  CONVERTED
+  LINKED
+  REJECTED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  URGENT
+}
+
+enum LeadAction {
+  CREATED
+  VIEWED
+  CONVERTED
+  LINKED
+  UPDATED
+}
+
+enum ContactType {
+  BUSINESS
+  PERSON
+}
+
+enum DealAction {
+  CREATED
+  STATUS_CHANGED
+  UPDATED
+  ASSIGNED
+}
+
+model TaskContact {
+  id        String @id @default(cuid())
+  taskId    String
+  contactId String
+  isPrimary Boolean @default(false)
+
+  task     Task @relation(fields: [taskId], references: [id])
+  contact  AccountContact @relation(fields: [contactId], references: [id])
+}
+
+enum TaskListTag {
+  GENERAL
+  PROJECT
+}
+enum TaskCategory {
+  ISTANBUL_CORE
+  ANADOLU_CORE
+  TRAVEL
+}
+enum TaskType {
+  GENERAL
+  PROJECT
+}
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+enum TaskStatus {
+  HOT
+  NOT_HOT
+  DEAL
+  COLD
+}
+enum GeneralStatus {
+  OPEN
+  CLOSED
+}
+
+enum OfferType {
+  OUR_OFFER
+  COUNTER_OFFER
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum DealStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum Reason {
+  YETKILIYE_ULASILDI
+  YETKILIYE_ULASILAMADI
+  ISLETMEYE_ULASILAMADI
+  TEKLIF_VERILDI
+  KARSITEKLIF
+  TEKLIF_KABUL
+  TEKLIF_RED
+  ISLETME_CALISMAK_ISTEMIYOR
+  GRUPANYA_CALISMAK_ISTEMIYOR
+  TEKRAR_ARANACAK
+}
+
+enum HistoryType {
+  LEAD_CONVERT
+  LEAD_LINKUP
+  TASK_OPEN
+  TASK_CLOSE
+  PROFILE_UPDATE
+  DUE_DATE_PASSED
+}
+
+// Audit Log
+model AuditLog {
+  id          String   @id @default(cuid())
+  entityType  AuditEntity
+  entityId    String
+  action      AuditAction
+  userId      String?
+  previousData Json?
+  newData     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+enum AuditEntity {
+  USER
+  LEAD
+  ACCOUNT
+  TASK
+  DEAL
+  TASKLIST
+  LOOKUP
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+}
+// Dedicated categories tables
+model CategoryMain {
+  id     String @id @default(cuid())
+  label  String @unique
+  active Boolean @default(true)
+  order  Int @default(0)
+  subs   CategorySub[]
+}
+
+model CategorySub {
+  id     String @id @default(cuid())
+  mainId String
+  main   CategoryMain @relation(fields: [mainId], references: [id])
+  label  String
+  active Boolean @default(true)
+  order  Int @default(0)
+
+  @@unique([mainId, label])
+}

@@ -1,0 +1,171 @@
+
+TASK YÖNETİM MODÜLÜ– TASARIM DÖKÜMANI
+AMAÇ:
+Task yönetim sistemini admin üzerinde gerekli operasyonlarla entegre çalışabilecek bir sistem haline getirmek.
+MEVCUT SİSTEM:
+Task sürecinin başından sonuna kadar olan her bir süreçte ayrı bir Google Sheet kullanarak operasyon yürütülmesi.
+Dezavantajlar:
+Yüksek yoğunluklu data ile çalışmanın süreçleri yavaşlatması
+Data bütünlüğünün sağlanamaması
+Manuel aksiyonlar temelinde işlemesi sebebiyle data güvenliğinde risk oluşturması.
+Planlama, operasyon ve raporlama alanlarında bütüncül perspektif oluşturmaması.
+
+Mevcut Sistemde Task Akışı
+
+SİSTEM ÖZETİ
+Genel Tanım: Sistem; account yönetimi, task oluşturma, task atama, atanan taskın işlenmesi, takip ve raporlama süreçlerini içerir.
+Akış Özeti: Lead(query), convert edilip accounta dönüştürülür ya da linkup lead yönergesiyle accounta bağlanır. Account üzerinden task oluşturulur, task satışçıya atanır, satışçı tarafından task güncellemesi yapılır ve task kapatılır. Deal statüsüyle kapatılan tasklar, girilen fırsat ile bağlanır.
+
+
+Kullanıcı Grupları: Admin, manager, user.
+Ana modüller: Kullanıcı Yönetimi,  Lead Yönetimi, Account Yönetimi,  Task Yönetimi ve Raporlama.
+
+
+
+
+FONKSİYONEL GEREKSİNİMLER
+KULLANICI YÖNETİMİ
+Admin
+Rol yönetebilir.
+Manager (Planlama)
+Sisteme gelen lead’i accounta çevirebilir (Convert Lead) veya bağlayabilir (Linkup Lead).
+Account List ve account profillerini görüntüleyebilir. Sıfırdan account oluşturabilir, account profil bilgilerini güncelleyebilir. Account status (Active, Passive) belirleyebilir. Deal history kısmını görüntüleyebilir. Task history kısmını görüntüleyebilir. Accounta task ekleyebilir. Accounta kontak ekleyebilir. Notes kısmına bilgi ekleyebilir.
+Task List’e erişebilir, görüntüleyebilir, yeni task listesi oluşturabilir, oluşturulan task listesine isim verebilir, verilen ismi değiştirebilir,  mevcut task listelerini silebilir.
+Task oluşturma, task atama ve atanmış taskların işlenmesi akışlarında tüm kısımları editleyebilir. Açık taska bildirim ekleyebilir. (Açık taska eklenen bildirim, satışçıya ulaşır. Örneğin; reklam bedelsiz alabiliriz, acil aranmalı vb).
+Anlık data çekebilir. Raporlama yapabilir.
+User (TeamLeader, Salesperson)
+Account List ve account profillerini görüntüleyebilir. Account Status (Active, Passive) belirleyebilir. Deal history kısmını görüntüleyebilir. Task history kısmını görüntüleyebilir. Accounta kontak ekleyebilir. Notes kısmına bilgi ekleyebilir.
+Account altında Non-Task oluşturulabilir, güncelleyebilir.
+Salesperson user, Task List’e erişim sağlayabilir. Kullanıcı filtresi kullanabilir. Task owner olduğu taskları görüntüleyebilir, filtreleyebilir, işleyebilir.
+Task oluşturma ve task atama akışındaki süreçlerde uzun vadede doğabilecek ihtiyaca yönelik tam yetkilendirilebilir ancak admin iznine tabii olmalıdır. İzni olmadığı sürece task oluşturma ve atama süreçlerinde güncelleme yapamaz. (Belki sadece Non-Task girişine de izin verilebilir.)
+Temel task yapısını oluşturan bölümlerde (Task Category, Task Type, Task Priority, Account Name,  Main Category, SubCategory, Owner, Account Type, Task Source, Task Details, Task Creation Date, Task Assignment Date, Duration, Due Date) değişiklik, güncelleme yapamaz. Atanmış taskların işlenmesi akışındaki kısımları (Contact, Salesperson Activity Log, Offers, Task Status, Follow Up Date) güncelleyebilir.
+Task owner olmadığı tasklar özelinde activity log oluşturamaz, mevcut activity logu silemez ve değiştiremez.
+Team leader user,   Assigne yönergesiyle task atama yapabilir, owner güncelleyebilir, Task Priority (Low, Medium, High, Critical) belirleyebilir. Duration belirleyebilir. Açık taska bildirim ekleyebilir. (Açık taska eklenen bildirim, satışçıya ulaşır. Örneğin; reklam bedelsiz alabiliriz, acil aranmalı vb).
+Team leader user,  anlık data çekebilir. Raporlama yapabilir.
+
+LEAD YÖNETİMİ
+Lead: Gelen query.
+Lead List, sisteme düşen tüm başvuruları listeler. Lead seçimi yapılabilir, detayı görüntülenebilir. Tarih filtresiyle görüntüleme yapılabilir.
+
+Lead Ekranında; Her lead satırında Convert Lead ve Linkup Lead seçenekleri bulunur. Sistemde mevcut kaydı bulunmayan ve account statüsü verilecek leadler, Convert Lead seçeneği ile convert edilerek lead statüsünden account statüsüne geçer ve account profilinde Account Activity History kısmına başvuru aktivitesi tarih detayı ile loglanır. Sistemde mevcut kaydı bulunan account için gelen leadler (başvurular), linkup lead seçeneği aktif edilip gelen lead, kayıtlı accounta bağlanarak account profilinde Account Activity History kısmına başvuru aktivitesi tarih detayı ile loglanır.
+
+
+
+ACCOUNT YÖNETİMİ
+Account: Sistemde kayıtlı işletme ekranı.
+Account List ekranı, sistemdekayıtlı işletmeleri listeler. Aynı ekranda yer alan Search kısmından search yapılabilir. Account seçimi yapılabilir, detayı görüntülenebilir. Creat New Account kısmından yeni account yaratılabilir. Sıralama ve Filtreleme yapılabilir.
+
+
+
+Sıralama:
+-A’dan  Z’ye
+-Z’den A’ya
+-En yeniden en eskiye
+-En eskiden en yeniye
+Filtreler:
+-Salesperson
+-Category Type
+-Account Category
+Account Source
+-Account Status
+-Account Type
+-Task List Tag
+-Şehir
+-İlçe
+
+Account ekranında profil bilgileri alanında; Account Name*, Business Name*, Account ID*, Account Status*, Account Source*, , Account Category*, Account Type*, Account Creation Date*, Business Contact Information* ,Contact  Person Information* ve Notes*bölümleri yer alır.
+
+*Account Name; işletme adıdır.
+*Business Name; İşletme ticari ünvanıdır.
+*Account ID; sistem tarafından otomatik atanan kimliktir.
+*Account Status (Active/Passive); İşletme faaliyetinin portföydeki aktiflik durumunu belirtir.
+*Account Source (Query, Fresh Account, Rakip, Referans ve Old Account); Bu kısım, işletmenin sisteme ilk kaydının kaynağını gösterir.(Query, fresh, rakip etiketi aslında bu amaç için yeterli görünüyor. Ancak bazı durumlarda sistemde kaydı olan işletme için yeni bir account oluşturmak gerekebiliyor. O sebeple, old account etiketinin de kullanılabilir durumda olması faydalı olacaktır.)
+*Account Category; işletmenin hizmet kimliğini belirtir.
+*Account Type (Key Account,Long Tail); işletmenin portföy içerisindeki önemini (getirdiği ciro ve marka değeri) belirtir.
+*Account Creation Date; işletmenin sisteme kaydedildiği tarihi belirtir.
+*Business Contact Information; işletmeye ait adres, telefon ve mail adresi bilgilerini belirtir.
+*Contact Person Information; işletme yetkilisine ait adres, telefon ve mail adresi bilgilerini belirtir.
+*Notes; işletme ile ilgili alınan notların girildiği alanı belirtir.
+
+Account Activity History  kısmı, işletmeye ait profil bilgilerinin altında yer alır. İşletme kaydı içerisinde gerçekleşen belirli hareketleri belirtir. İşletmenin profil bilgilerinde gerçekleşen güncellemelerde, task açılıp kapatıldığında, lead ekranından linkup lead ile lead bağlandığında bu kısıma özet bilgi otomatik olarak düşer ve account ekranında görüntülenir.
+Deal History kısmı, Account Activity History kısmının altında yer alır. Girilen fırsatların detayı ve yayın durumu listelenir. Fırsat ID’si, Fırsat başlığı, yayın tarih aralığı, son satışçısı, fırsat durumu özet bilgi olarak görüntülenir. Fırsat ID’ye tıklanarak fırsat detayı açılıp görüntülenebilir.
+Task History kısmı, Deal History kısmının altında yer alır. İşletme görüşmeleri için açılan taskların detay ve sonuçlarını kronojik olarak belirtir. Task id, Task status, ve Task Creation Date bilgileri özet bilgi olarak görüntülenir. Task id’ye tıklanarak task detayı açılıp tüm detay görüntülenebilir.  Açık taska bildirim eklenebilir. (Açık taska eklenen bildirim, satışçıya ulaşır. Örneğin; reklam bedelsiz alabiliriz, acil aranmalı).
+Task Ekle kısmı, Task History bölümünün hemen üstünde yer alır. Tıklandığında içinde bulunulan account için task oluşturma ekranına yönlendirir.
+
+TASK YÖNETİMİ
+Task, işletme görüşmeleri için açılan, accounta bağlı olarak sistemde kaydedilen görevlerdir.
+Task Lists ekranında, oluşturulan task listeleri sıralanır. Mevcut task listelerinin detayı açılabilir. Task listelerinin ismi güncellenebilir. Task listesine Tasklist Tag (General, Project) eklenebilir. Yeni task listesi oluşturulabilir. Mevcut task listesi silinebilir. Task listeleri filtrelenebilir, sıralanabilir. Seçilen task listesinde yeni task oluşturulabilir.
+
+Sıralama:
+-En eskiden en yeniye
+-En yeniden en eskiye
+Filtreler:
+-Tasklist Tag
+General (Haftalık Rutin Task Listeleri)
+Project (Özel Dönemler ya da Stratejik Hedef Odaklı Task Listeleri)
+
+Task Oluşturma
+Account ekranı ve/veya Task ekranında task oluşturulabilir.
+
+Account ekranında, account profili içerisinde Task History kısmından Task ekle yönergesi ile yeni task oluşturulabilir. Rutin task oluşturmak için, historyde hiç task açılmamış olması veya önceki taskın kapatılmış olması şartı sağlanmalıdır. Tasklist Tag’i “General” olan task listesine dahil edilen bir task söz konusu ise açık taskın üzerine yeni bir task açılamaz. Projeye eklenen tasklar için bu şart aranmaz.  Tasklist Tag’i “Project” olan task listesine dahil edilen bir task sözkonusu ise açık taskın üzerine task açılabilir.
+
+Task Lists ekranında, task listeleri detay sayfasında Task ekle yönergesi ile yeni task oluşturulabilir.
+
+
+Task oluşturma ekranında; Task ID*,Task Category*,Task Type*, Task Priority*,Account Name,  Main Category*, SubCategory*, Contact*, Owner*, Account Type*, Task Source*, Task Details*, Task Creation Date, Task Assignment Date*,  Duration*, Due Date*,Salesperson Activity Log*,Offers*, Task Status*, Task General Status*, Follow Up Date* kısımları yer alır.
+
+*Task ID; sistem tarafından otomatik atanan task numarasıdır.
+* Task Category; İstanbul Core, Anadolu Core, Travel kategorilerinden hangisine ait olduğunu belirtir.
+*Task Type; General veya Project task listesi tiplerinden hangisine ait olduğunu belirtir.
+*Task Priority (Low, Medium, High, Critical); taskın öncelik durumunu belirtir.
+*Account Name; işletme adıdır.
+* Main Category; taskın hangi ana kategoride bulunduğunu belirtir.
+*Subcategory; taskın hangi alt kategoridebulunduğunu belirtir.
+*Contact; taskın kontak bilgisini belirtir.
+*Owner; taskın atandığı satışçıyı belirtir.
+*Account Type(Key Account,Long Tail); task açılan işletmenin portföy içerisindeki konumunu belirtir.
+*Task Source(Query, Fresh Account, Rakip, Referans ve Old Account); taskın hangi kaynaktan oluşturulduğunu belirtir.
+*Task Details; işletme ve task hakkındaki detayları belirtir.
+*Task Creation Date; sistemde taskın oluşturulduğu tarihi belirtir.
+*Task Assignment Date;  taskın satışçıya atandığı tarihi belirtir.
+*Duration; taskın kapatılması için verilen maksimum süreyi belirtir.
+*Due Date; taskın kapatılması gereken son tarihi belirtir.
+*Salesperson Activity Log; satışçı-işletme arasındaki görüşme notlarını belirtir. Log seçimli ve free-text olmak üzere 2 alandan oluşur.
+
+Reasons:
+Yetkiliye ulaşıldı.
+Yetkiliye ulaşılamadı.
+İşletmeye ulaşılamadı.
+Teklif verildi.(Reklam bedeli, komisyon, joker girilmesi zorunlu alan)
+İşletme karşı teklif verdi..(Reklam bedeli, komisyon, joker girilmesi zorunlu alan)
+Teklif Kabul edildi.
+Teklif Kabul edilmedi.
+İşletme çalışmak istemiyor.
+Grupanya çalışmak istemiyor.
+Tekrar aranacak. (Arama tarihi zorunlu)
+
+*Offers; verilen teklifleri belirtir. Reklam bedeli, komisyon ve joker olarak verilen tekliflerdir.
+*Task Status; taskın güncel durumunu belirtir. (Hot, Not Hot, Deal, Cold)
+*Task General Status; taskın açık veya kapalı olduğunu belirtir.(Open/Closed)
+*Follow Up Date; işletmenin tekrar aranacağı tarihi belirtir.
+
+Task oluşturma akışında; Task Manager,” Yeni Task Ekle” yönergesiyle task oluşturma ekranını açar. Task Category,Task Type, Task Priority,Account Name,  Main Category, SubCategory, Owner, Account Type, Task Source, Task Details kısımlarına bilgileri girer. “Task Oluştur” yönergesiyle task oluşturulur. Task ID ve Task Creation Date otomatik olarak sistem tarafından atanır. Task General Status Open olarak taglenir. Oluşturulan tasklar, Task Lists ekranında dahil edildiği task listesinde listelenir.
+
+
+
+Task atama akışında; oluşturulan tasklar Task Lists ekranında seçilen task listesi altında listenip görüntülenir. Task Manager ya da Team Leader yetkisi bulunan kullanıcı tarafından“Owner” kısmından kullanıcı seçilir, “Duration” bilgisi girilir,“Assign” yönergesi kullanılarak task ataması gerçekleştirilir.Sistem “Task Assignment Date” ve “Due Date” kısımlarını otomatik olarak atar.
+
+
+
+Atanmış taskların işlenmesi akışı; ataması gerçekleşen tasklar Task Lists ekranında satışçı tarafından listelenir. Owner, Task Priority, Main Category, SubCategory, Account Type, Task Source filtrelemeleri ile açık tasklar listelenebilir. Seçilen task özelinde;  yapılan görüşmelerin notlarının sisteme kaydı, “Salesperson Activity Log” bölümünde, log seçimli ve free text kısımları doldurularak yapılır.“Offers”, “Task Status” ve “Follow Up Date” bölümlerine bilgi girişi sağlanır. Task status’u Deal ve Cold olarak seçilen tasklar, Due Date tarihine kadar manuel kapatılabilir. Due Date tarihinde açık kalan tasklar otomatik olarak kapatılır. Task History alanında ilgili task satırında “Due Date Passed”olarak özetlenir. Kapatılan taskın Task General Status’ü “Closed” olarak belirlenir.
+
+
+
+RAPORLAMA
+
+Lead, Account, Task, Fırsat ve Satışçı bazında yapılan raporlamaları içerir.
+Sistemdeki tüm kayıtlar raporlanabilir özelliktedir.
+Filtreleme sistemi kullanılarak dökülen datayı Excel’e aktar yönergesiyle indirerek istenilen kırılımda raporlar oluşturulabilir.
+Modülün rapor sekmesinden günlük, haftalık, aylık ve yıllık özet rapor görüntülenebilir.
+New Grupanya Performance benzeri otomatik bir rapor periyodik, olarak kullanıcılarla mail yoluyla paylaşılabilir.
+

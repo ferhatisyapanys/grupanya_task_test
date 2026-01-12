@@ -1,0 +1,17 @@
+# Node
+node_modules/
+*.log
+.env
+.env.local
+dist/
+.next/
+.turbo/
+
+# Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Prisma
+apps/api/prisma/dev.db*
+
