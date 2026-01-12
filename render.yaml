@@ -7,6 +7,8 @@ services:
     buildCommand: npm ci && npm run build && npx prisma migrate deploy --schema prisma/schema.prisma
     startCommand: npm run start
     autoDeploy: true
+    domains:
+      - grupanya-api.onrender.com
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -22,6 +24,30 @@ services:
       - key: CORS_ORIGINS
         value: "*"
 
+  - type: web
+    name: grupanya-web
+    env: node
+    rootDir: apps/web
+    plan: free
+    buildCommand: |
+      cd ../..
+      npm ci
+      npm --workspace=packages/ui run build
+      npm --workspace=packages/sdk run build
+      cd apps/web
+      npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    domains:
+      - grupanya-web.onrender.com
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE
+        value: https://grupanya-api.onrender.com/api
+      - key: NEXT_PUBLIC_DEV_USER_ID
+        value: public-viewer
+      - key: NEXT_PUBLIC_DEV_ROLE
+        value: MANAGER
+
 databases:
   - name: grupanya-postgres
     databaseName: grupanya_task
@@ -30,4 +56,3 @@ databases:
 redis:
   - name: grupanya-redis
     plan: free
-
