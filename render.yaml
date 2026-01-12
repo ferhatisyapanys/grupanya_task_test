@@ -1,12 +1,12 @@
 services:
   - type: redis
-    name: grupanya-redis
+    name: grupanya-task-test-redis
     plan: free
     ipAllowList:
       - source: 0.0.0.0/0
 
   - type: web
-    name: grupanya-api
+    name: grupanya-task-test-api
     env: node
     rootDir: apps/api
     plan: free
@@ -16,11 +16,11 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: grupanya-postgres
+          name: grupanya-task-test-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          name: grupanya-redis
+          name: grupanya-task-test-redis
           type: redis
           property: connectionString
       - key: DISABLE_JOBS
@@ -29,7 +29,7 @@ services:
         value: "*"
 
   - type: web
-    name: grupanya-web
+    name: grupanya-task-test-web
     env: node
     rootDir: apps/web
     plan: free
@@ -44,16 +44,15 @@ services:
     autoDeploy: true
     envVars:
       - key: NEXT_PUBLIC_API_BASE
-        # Render assigns domain automatically; API service internal domain resolves externally too.
-        # After first deploy, you may replace this with the actual HTTPS domain.
-        value: https://grupanya-api.onrender.com/api
+        # Placeholder; after first deploy replace with actual API domain if different
+        value: https://grupanya-task-test-api.onrender.com/api
       - key: NEXT_PUBLIC_DEV_USER_ID
         value: public-viewer
       - key: NEXT_PUBLIC_DEV_ROLE
         value: MANAGER
 
 databases:
-  - name: grupanya-postgres
+  - name: grupanya-task-test-postgres
     databaseName: grupanya_task
     plan: free
     ipAllowList:
