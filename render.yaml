@@ -1,4 +1,8 @@
 services:
+  - type: redis
+    name: grupanya-redis
+    plan: free
+
   - type: web
     name: grupanya-api
     env: node
@@ -7,8 +11,6 @@ services:
     buildCommand: npm ci && npm run build && npx prisma migrate deploy --schema prisma/schema.prisma
     startCommand: npm run start
     autoDeploy: true
-    domains:
-      - grupanya-api.onrender.com
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -17,7 +19,6 @@ services:
       - key: REDIS_URL
         fromService:
           name: grupanya-redis
-          type: redis
           property: connectionString
       - key: DISABLE_JOBS
         value: "true"
@@ -38,10 +39,10 @@ services:
       npm run build
     startCommand: npm run start
     autoDeploy: true
-    domains:
-      - grupanya-web.onrender.com
     envVars:
       - key: NEXT_PUBLIC_API_BASE
+        # Render assigns domain automatically; API service internal domain resolves externally too.
+        # After first deploy, you may replace this with the actual HTTPS domain.
         value: https://grupanya-api.onrender.com/api
       - key: NEXT_PUBLIC_DEV_USER_ID
         value: public-viewer
@@ -51,8 +52,4 @@ services:
 databases:
   - name: grupanya-postgres
     databaseName: grupanya_task
-    plan: free
-
-redis:
-  - name: grupanya-redis
     plan: free
